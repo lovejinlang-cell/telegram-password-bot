@@ -3,8 +3,11 @@
 Uses python-telegram-bot v20+ (async) + secrets module.
 Uses HTML parse mode (more reliable than MarkdownV2 for special chars).
 Free for all users. Mobile-friendly copy button included.
+Optimized for Background Worker deployment.
 """
 
+import os
+import logging
 import secrets
 import string
 import math
