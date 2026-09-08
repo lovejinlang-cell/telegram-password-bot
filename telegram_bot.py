@@ -5,15 +5,11 @@ Uses HTML parse mode (more reliable than MarkdownV2 for special chars).
 Free for all users. Mobile-friendly copy button included.
 """
 
-import os
-import logging
 import secrets
 import string
 import math
 import time
 import threading
-import urllib.request
-from http.server import HTTPServer, BaseHTTPRequestHandler
 from collections import defaultdict
 from html import escape as html_escape
 
@@ -369,36 +365,7 @@ def main():
         print("\n❌  No token! Edit telegram_bot.py and add your BotFather token.\n")
         return
 
-    # ── Mini HTTP server so UptimeRobot can ping and keep bot alive ───────────
-    class PingHandler(BaseHTTPRequestHandler):
-        def do_GET(self):
-            self.send_response(200)
-            self.end_headers()
-            self.wfile.write(b"Bot is alive!")
-        def log_message(self, format, *args):
-            pass  # silence HTTP logs
-
-    def run_http():
-        port = int(os.getenv("PORT", 8080))
-        server = HTTPServer(("0.0.0.0", port), PingHandler)
-        logger.info(f"🌐 HTTP ping server on port {port}")
-        server.serve_forever()
-
-    threading.Thread(target=run_http, daemon=True).start()
-
-    # ── Keep-alive ping every 10 min (prevents Render free tier sleeping) ──────
-    render_url = os.getenv("RENDER_EXTERNAL_URL")
-    if render_url:
-        def ping():
-            while True:
-                try:
-                    urllib.request.urlopen(render_url, timeout=10)
-                    logger.info("✅ Keep-alive ping sent.")
-                except Exception:
-                    pass
-                time.sleep(600)
-        threading.Thread(target=ping, daemon=True).start()
-        logger.info(f"🔔 Keep-alive started: {render_url}")
+    # Background Worker - no HTTP server needed!
 
     app = Application.builder().token(BOT_TOKEN).build()
 
